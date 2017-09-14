@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test1</title>
+</head>
+<body>
+<!--
+ 事件就是用户或浏览器自身执行的某种动作。诸如click、load和mouseover，都是事件的名字。
+ 而响应某个事件的函数就叫做“事件处理程序（或事件侦听器）”。事件处理程序的名字是以on开头，因此click事件的事件处理程序
+ 就是onclick，load事件的事件处理程序就是onload。为事件指定处理程序的方式有好几种。
+ -->
+<!--某个元素支持的每种事件，都可以使用一个与相应事件处理程序同名的HTML特性来指定。
+ 这个特性的值应该是能够执行的JavaDcript代码。例如，要在按钮被单击时执行一些JavaScript，可以像下面这样编写代码：
+ -->
+<input type="button" value="CLICK1" onclick="alert('Clicked')" />
+
+<!--当单击这个按钮时，就会显示一个警告框。这个操作是指通过指定onclick特性并将一些JavaScript代码作为它的值来定义的。
+ 由于这个值是JavaScript，因此不能在其中使用未经转义的HTML语法字符，例如和号（&）、双引号（“”）、小于号（<）或大于号（>）
+ 为了避免使用HTML实体，这里使用了单引号。如果想使用双引号，那么就要将代码改写成如下所示：
+ -->
+<input type="button" value="Click2" onclick="alert(&quot;Clicked&quot;)" />
+<br>
+
+<!--在HTML中定义的事件处理程序可以包含要执行的具体动作，也可以调用在页面其他地方定义的脚本，如下面的例子所示： -->
+<script type="text/javascript">
+    function showMessage(){
+        alert("Hello world!");
+    }
+</script>
+<input type="button" value="Click3" onclick="showMessage()" />
+<br>
+<!--在这个例子中，单击按钮就会调用showMessage()函数。这个函数是在一个独立的<script>元素中定义的，
+当然也可以被包含在一个外部文件中。事件处理程序中的代码在执行时，有权访问全局作用域中的任何代码。
+ 这样指定事件处理程序具有一些独到之处。首先，这样会创建一个封装元素属性值的函数。这个函数中有一个局部变量event，也就是
+ 事件对象（本章稍后讨论）
+ -->
+
+<!--通过事件对象event变量，可以直接访问事件对象，你不用自己定义它，也不用从函数列表中读取。 -->
+<input type="button" value="Click here" onclick="alert(event.type)">
+<br>
+
+<!--在这个函数内部，this值等于事件的目标元素-->
+<input type="button" value="Click Me" onclick="alert(this.value)">
+<br>
+
+<!--关于这个动态创建的函数，另一个有意思的地方是它扩展作用域的方式。在这个函数内部，可以像访问局部变量一样访问document
+ 及该元素本身的成员。这个函数使用with像下面这样扩展作用域：
+ function(){
+      with(document){
+          wuth(this){
+              //元素属性
+          }
+      }
+ }
+ -->
+<!-- 如此一来，事件处理程序要访问自己的属性就简单多了。下面这行代码与前面的例子效果相同：-->
+<input type="button" value="Hey,Click" onclick="alert(value)">
+<br>
+
+<!--如果当前元素是一个表单输入元素，则作用域中还包含访问表单元素（父元素）的入口，这个函数就变成了如下所示 -->
+<!--
+function(){
+     with(document){
+          with(this.form){
+               with(this)
+        }
+   }
+}
+-->
+<!--实际上，这样扩展作用域的方式，无非就是想让事件处理程序无需引用表单元素就能访问其他表单字段，例如： -->
+<form method="post">
+    <input type="text" name="username" value="Rock">
+    <input type="button" value="Echo Username" onclick="alert(username.value)">
+</form>
+<!--
+在上面这个例子中，单机按钮会显示文本框中的文本。值得注意的是，这里直接引用了username元素。
+ 不过，在HTML中指定事件处理程序有两个缺点。首先，存在一个时差问题。因为用户可能会在HTML元素一出现在页面上就触发相应的事件，
+ 但当时的事件处理程序有可能尚不具备执行条件。以前面的例子来说明，假设showMessage（）函数之前就单击了按钮，机会引发错误。
+ 为此，很多HTML事件处理程序都会被封装在一个try-catch（）块中，以便错误不会浮出水面，如下面的例子所示：
+ -->
+<input type="button" value="Try to CLICK" onclick="try{showMessage();}catch(ex){}">
+<!--
+这样，如果在showMessage（）函数有定义之前单击了按钮，用户将不会看到JavaScript错误，因为在浏览器有机会处理错误之前，
+错误就被捕获了。
+另一个缺点是，这样扩展事件处理程序的作用域链在不同浏览器中会导致不同结果。不同JavaScript引擎遵循的标示符解析规则略有差异，
+很可能会在访问非限定对象成员时出错。
+通过HTML指定事件处理程序的最后一个缺点是HTML与JavaScript代码紧密耦合。如果要更换事件处理程序，就要改动两个地方：
+HTML与JavaScript代码h和JavaScript代码。而这正是许多开发人员摈弃HTML事件处理程序，转而使用JavaScript指定事件处理程序的原因所在。
+-->
+</body>
+</html>
