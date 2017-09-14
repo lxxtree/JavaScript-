@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>13.2.2DOM0级事件处理程序</title>
+</head>
+<body>
+<!--
+      通过JavaScript指定事件处理程序的传统方式，就是将一个函数赋值给一个事件处理程序属性。这种为事件处理程序赋值的方法是在
+  第四代Web浏览器中出现的，而且至今仍然为所有现代浏览器所支持。原因一是简单，二是具有跨浏览器的优势。
+  要使用JavaScript指定事件处理程序，首先必须取得一个要操作的对象的引用。
+      每个元素（包括window和document）都有自己的事件处理程序属性，这些属性通常全部小写，例如onclick。
+  将这种属性的值设置为一个函数，就可以指定事件处理程序，如下所示：
+-->
+<!--button按钮们需放在事件处理程序前面，不然报错-->
+<input type="button" id="myBtn" value="Click Me"/>
+<input type="button" id="thisBtn" value="Click here" />
+<input type="button" id="removeBtn" value="removeBtn" />
+<script type="text/javascript">
+    var btn = document.getElementById("myBtn");
+    btn.onclick= function(){
+        alert("Clicked");
+    };
+<!--
+       在此，我们通过文档对象取得了一个按钮的引用，然后为它指定了onclick事件处理程序。但要注意，在这些代码运行以前不会指定
+   事件处理程序，因此如果这些代码在页面中位于按钮后面，就有可能在一段时间内怎么单击都没有反应。
+       使用DOM0级方法指定的事件处理程序被认为是元素的方法。因此，这时候的事件处理程序是在元素的作用域中运行；换句话说，程序
+   中的this引用当前元素。来看下面的例子
+ -->
+    var thisBtn = document.getElementById("thisBtn");
+    thisBtn.onclick = function(){
+        alert(this.id);
+    };
+<!--
+        单击按钮显示的是元素的ID，这个ID是通过this.id取得的。不仅仅是ID，实际上可以在事件处理程序中通过this访问元素的任何属性
+    和方法。以这种方式添加的事件处理程序会在事件流的冒泡阶段被处理。
+        也可以删除通过DOM0级方法指定的事件处理程序，只要像下面这样将事件处理程序属性的值设置为null即可：
+ -->
+    var removeBtn = document.getElementById("removeBtn");
+    removeBtn.onclick = function(){
+        btn.onclick = null;
+        thisBtn.onclick = null;
+        alert("Delete Done!");
+    };
+ <!--将事件处理程序设置为null之后，再单击按钮将不会有任何动作发生-->
+</script>
+<!--
+         如果你使用HTML指定事件处理程序，那么onclick属性的值就是一个包含着在同名HTML特性中指定代码的函数。
+     而将相应的属性设置为null，也可以删除以这种方式指定的事件处理程序。
+-->
+</body>
+</html>
