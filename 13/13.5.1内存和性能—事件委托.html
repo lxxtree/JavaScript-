@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>内存和性能—事件委托</title>
+    <script type="text/javascript" src="scripts/EventUtil.js"></script>
+</head>
+<body>
+<ul id="myLinks">
+    <li id="goSomewhere">Go somewhere</li>
+    <li id="doSomething">Do something</li>
+    <li id="sayHi">Say hi</li>
+</ul>
+<script type="text/javascript">
+    /*
+        由于事件处理程序可以为现代Web应用程序提供交互能力，因此许多开发人员会不分青红皂白地向页面中添加大量的处理程序。
+      在创建GUI的语言（如C#）中，为GUI中的每个按钮添加一个onclick事件处理程序是司空见惯的事，而且这样做也不会导致什么问题。
+      可是在JavaScript中，添加到页面上的事件处理程序数量将直接关系到页面的整体运行性能。导致这一问题的原因是多方面的。
+       首先，每个函数都是对象，都会占用内存；内存中的对象越多，性能就越差。
+       其次，必须事先指定所有事件处理程序而导致的DOM访问次数，会延迟整个页面的交互就绪时间。
+       事实上，从如何利用好事件处理程序的角度出发，还是有一些方法能够提升性能的。
+     */
+    /*
+        13.5.1事件委托
+          对“事情处理程序过多”问题的解决方案就是事件委托。事件委托利用了事件冒泡，只指定一个事件处理程序，就可以管理
+        某一类型的所有事件。例如，click事件会一直冒泡到document层次。也就是说，我们可以为整个页面指定一个onclick事件处理程序，
+        而不必给每个可单击的元素分别添加事件处理程序。
+        以下面的HTML代码为例。
+     <ul id="myLinks">
+     <li id="goSomewhere">Go somewhere</li>
+     <li id="doSomething">Do something</li>
+     <li id="sayHi">Say hi</li>
+     </ul>
+
+     其中包含3个被单击后会执行操作的表现项。按照传统的做法，需要像下面这样为它们添加3个事件处理程序
+     var item1 = document.getElementById("goSomewhere");
+     var item2 = document.getElementById("doSomething");
+     var item3 = document.getElementById("sayHi");
+
+     EventUtil.addHandler(item1,"click",function(event){
+     location.href = "http://www.wrox.com";
+     });
+
+     EventUtil.addHandler(item2,"click",function(event){
+     document.title = "I changed the document's title";
+     });
+
+     EventUtil.addHandler(item3,"click",function(event){
+     alert("hi");
+     });
+     */
+
+    /*
+         如果在一个复杂的Web应用程序中，对所有可单击的元素都采用这种方式，那么结果就会有数不清的代码用于添加事件处理程序。
+       此时，可以利用事件委托技术解决这个问题。使用事件委托，只需在DOM树中尽量最高的层次上添加一个事件处理程序，
+       如下面的例子。
+   */
+    var list = document.getElementById("myLinks");
+    EventUtil.addHandler(list,"click",function(event){
+        event = EventUtil.getEvent(event);
+        var target = EventUtil.getTarget(event);
+
+        switch(target.id){
+            case "doSomething":
+                document.title = "I changed the document's title";
+                break;
+
+            case "goSomewhere":
+                location.href = "http://www.wrox.com";
+                break;
+
+            case "sayHi":
+                alert("hi");
+                break;
+        }
+    });
+    /*
+         在这段代码里，我们使用事件委托只为<ul>元素添加了一个onclick事件处理程序。由于所有列表项都是这个元素的子节点，
+       而且它们的事件会冒泡，所以单击事件最终会被这个函数处理。我们知道，事件目标都是被单击的列表项，故而可以通过检测id属性
+       来决定采取适当的操作。与前面未使用事件委托的代码比一比，会发现这段代码的事前消耗更低，因为只取得了一个DOM元素，只
+       添加了一个事件处理程序。虽然对于用户来说最终的结果相同，但是这种技术需要占用的内存更少。所有用到按钮的事件（多数
+       鼠标事件和键盘事件）都适合采用事件委托技术。
+     */
+    /*
+       如果可行的话，也可以考虑为document添加一个事件处理程序，用以处理页面上发生的某种特定类型的事件。
+       这样做与采取传统的做法相比具有如下优点。
+       1、document对象很快就可以访问，而且可以在页面生命周期的任何时点上为它添加事件处理程序（无需等待DOMContentLoaded或load事件）。
+       换句话说，只要可单击的元素呈现在页面上，就可以立即具备适当的功能。
+       2、在页面中设置事件处理程序所需的时间更少。只添加一个事件处理程序所需的DOM引用更少，所花的时间也更少。
+       3、整个页面占用的内存空间更少，能够提升整体性能。
+         最适合采用事件委托技术的事件包括click、mousedown、mouseup、keydown、keyup和keypress。虽然mouseover和mouseout事件也
+      冒泡，但要适当处理它们并不容易，而且经常需要计算元素的位置。（因为当鼠标从一个元素移到其子节点时，或者鼠标移出该元素时，
+      都会触发mouseout事件。）
+     */
+</script>
+</body>
+</html>
