@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>焦点事件</title>
+</head>
+<body>
+<!--
+焦点事件会在页面元素获得或失去焦点时触发。利用这些事件并与document.hasFocus()方法及document.activeElement属性配合，可以
+知晓用户在页面上的行踪。有以下6个焦点事件。
+1、blur：在元素失去焦点时触发。这个事件不会冒泡；所有浏览器都支持它。
+2、DOMFocus：在元素获得焦点时触发。这个事件与HTML事件focus等价，但它冒泡。只有Opera支持这个事件。
+   DOM3级事件废弃了DOMFocusIn，选择了focusin。
+3、DOMFocusOut：在元素失去焦点时触发。这个事件是HTML事件blur的通用版本。只有Opera支持这个事件。
+   DOM3级事件废弃了DOMFocusOut，选择了focusout。
+4、focus：在元素获得焦点时触发。这个事件不会冒泡；所有浏览器都支持它。
+5、focusin：在元素获得焦点时触发。这个事件与HTML事件focus等价，但它冒泡。支持这个事件的浏览器有IE5.5+、Safari5.1+、
+   Opera 11.5+和Chrome。
+6、focusout：在元素失去焦点时触发。这个事件是HTML事件blur的通用版本。支持这个事件的浏览器有IE5.5+、Safari5.1+、
+   Opera 11.5+和Chrome。
+这一类事件中最主要的两个是focus和blur，它们都是JavaScript早期就得到所有浏览器支持的事件。这些事件的最大问题是它们不会冒泡。
+因此，IE的focusin和focusout与Opera的DOMFocusIn和DOMFocusOut才会发生重叠。IE的方式最后被DOM3级事件采纳为标准方式。
+     当焦点从页面中的一个元素移动到另一个元素，会依次触发下列事件：
+     （1）focusout在失去焦点的元素上触发；
+     （2）focusin在获得焦点的元素上触发；
+     （3）blur在失去焦点的元素上触发；
+     （4）DOMFocusOut在失去焦点的元素上触发；
+     （5）focus在获得焦点的元素上触发；
+     （6）DOMFocusIn在获得焦点的元素上触发；
+     其中，blur、DOMFocusOut和focusout的事件目标是失去焦点的元素；而focus、DOMFocusIn和focusin的事件目标是获得焦点的元素。
+         要确定浏览器是否支持这些事件，可以使用如下代码：
+
+-->
+<!--
+      其中，blur、DOMFocusOut和focusout的事件目标是失去焦点的元素；而focus、DOMFocusIn和focusin的事件目标是获得焦点的元素。
+      要确定浏览器是否支持这些事件，可以使用如下代码：
+-->
+<script type="text/javascript">
+    var isSupported = document.implementation.hasFeature("FocusEvent","3.0");
+    alert(isSupported);
+</script>
+
+</body>
+</html>
