@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>13.2.3DOM2级事件处理程序</title>
+</head>
+<body>
+<!--
+     “DOM2级事件”定义了两个方法，用于处理指定和删除事件处理程序的操作：addEventListener（）和removeEventListener（）。
+   所有DOM节点中都包含这两个方法，并且它们都接受3个参数：要处理的事件名、作为事件处理程序的函数和一个布尔值。
+   最后这个布尔值参数如果是true，表示在捕获阶段调用事件处理程序；如果是false，表示在冒泡阶段调用事件处理程序。
+       要在按钮上为click事件添加事件处理程序，可以使用下列代码：
+-->
+<input type="button" id="myBtn" value="Click me"/>
+<input type="button" id="myBtn2" value="Click here"/>
+<input type="button" id="myBtn3" value="Hey! Click!"/>
+<input type="button" id="myBtn4" value="try to Click!"/>
+<script>
+    var btn = document.getElementById("myBtn");
+    btn.addEventListener("click",function(){
+        alert(this.id);
+    },false);
+    /*
+           上面的代码为一个按钮添加了onclick事件处理程序，而且该事件会在冒泡阶段被触发（因为最后一个参数是false）。与DOM0级
+        方法一样，这里添加的事件处理程序也是在其依附的元素的作用域中运行。使用DOM2级方法添加事件处理程序的主要好处是可以添加
+        多个事件处理程序。来看下面的例子。
+    */
+    var btn2 = document.getElementById("myBtn2");
+    btn2.addEventListener("click",function(){
+        alert(this.value);
+    },false);
+    btn2.addEventListener("click",function(){
+        alert("Hello world!");
+    },false);
+    /*
+         这里为按钮添加了两个事件处理程序。这两个事件处理程序会按照添加它们的顺序触发，因此首先会显示元素的ID，其次会
+         显示“Hello world！”消息。
+         通过addEventListener()添加的事件处理程序只能使用removeEventListener()来移除；移除时传入的参数与添加处理程序时
+         使用的参数相同。这也意味着通过addEventListener（）添加的匿名函数将无法移除，如下面的例子所示：
+     */
+    var btn3 = document.getElementById("myBtn3");
+    btn3.addEventListener("click",function(){
+        alert(this.value);
+    },false);
+
+    //这里省略了其他代码
+    btn3.removeEventListener("click",function(){ //没有用！
+        alert(this.value);
+    },false);
+    /*
+       在这个例子中，我们使用addEventListener（）添加了一个事件处理程序。虽然调用removeEventListener（）时看似使用了相同
+       的参数，但实际上，第二个参数与传入addEventListener（）中的那一个是完全不同的函数。而传入removeEventListener（)中
+       的事件处理程序函数必须与传入addEventListener（）中的相同，如下面的例子所示。
+     */
+    var btn4 = document.getElementById("myBtn4");
+    var handler = function(){
+        alert(this.id);
+    };
+    btn4.addEventListener("click",handler,false);
+
+    //这里省略了其他代码
+
+  btn4.removeEventListener("click",handler,false); //有效
+    /*
+         重写后的这个例子没有问题，是因为在addEventListener（）和removeEventListener（）中使用了相同的函数。
+         大多数情况下，都是将事件处理程序添加到事件流的冒泡阶段，这样可以最大限度地兼容各种浏览器。最好只在需要在事件
+      到达目标之前截获它的时候将事件处理程序添加到捕获阶段。如果不是特别需要，我们不建议在事件捕获阶段注册事件处理程序。
+     */
+</script>
+
+
+</body>
+</html>
