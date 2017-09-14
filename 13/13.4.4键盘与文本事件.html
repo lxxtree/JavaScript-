@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>键盘与文本事件</title>
+    <script type="text/javascript" src="scripts/EventUtil.js"></script>
+</head>
+<body>
+<input type="text" id="myText" />
+<script type="text/javascript">
+    /*
+          用户在使用键盘时会触发键盘事件。“DOM2级事件”最初规定了键盘事件，但在最终定稿之前
+      又删除了相应的内容。结果，对键盘事件的支持主要遵循的是DOM0级。
+         “DOM3级事件”为键盘事件制定了规范，IE9率先完全实现了该规范。其他浏览器也在着手实现这一标准，但仍然有很多遗留的问题。
+          有3个键盘事件，简述如下。
+          1、keydown：当用户按下键盘上的任意键时触发，而且如果按住不放的话，会重复触发此事件。
+          2、keypress：当用户按下键盘上的字符键时触发，而且如果按住不放的话，会重复触发此事件。按下Esc键也会触发这个事件。
+             Safari3.1之前的版本也会在用户按下非字符键时触发keypress事件。
+          3、keyup：当用户释放键盘上的键时触发。
+          虽然所有元素都支持以上3个事件，但只有在用户通过文本框输入文本时才最常用到。
+          只有一个文本事件：textInput。这个事件是对keypress的补充，用意是在将文本显示给用户之前更容易拦截文本。
+      在文本插入文本框之前会触发textInput事件。
+          在用户按了一下键盘上的字符键时，首先会触发keydown事件，然后紧跟着是keypress事件，最后会触发keyup事件。
+      其中，keydown和keypress都是在文本框发生变化之前被触发的；而keyup事件则是在文本框已经发生变化之后被触发的。
+      如果用户按下了一个字符键不放，就会重复触发keydown和keypress事件，直到用户松开该键为止。
+          如果用户按下的是一个非字符键，那么首先会触发keydown事件，然后就是keyup事件。如果按住这个非字符键不放，
+      那么就会一直重复触发keydown事件，直到用户松开这个键，此时会触发keyup事件。
+      注意：键盘事件和鼠标事件一样，都支持相同的修改键。而且，键盘事件的事件对象中也有shiftKey、ctrlKey、altKey和metaKey
+      属性，IE不支持metaKey。
+     */
+
+    /*
+        一、键码
+           在发生keydown和keyup事件时，event对象的keyCode属性中会包含一个代码，与键盘上一个特定的键对应。对数字字母字符键，
+        keyCode属性的值与ASCII码中对应小写字母或数字的编码相同。因此，数字键7的keyCode值为55，而字母A键的keyCode值为65——
+        与Shift键的状态无关。
+        DOM和IE的event对象都支持keyCode属性。请看下面这个例子：
+     */
+    var textbox = document.getElementById("myText");
+/*
+    EventUtil.addHandler(textbox,"keyup",function(event){
+        event = EventUtil.getEvent(event);
+        alert(event.keyCode);
+    });
+*/
+    /*
+        在这个例子中，用户每次在文本框中按键触发keyup事件时，都会显示keyCode的值。
+        无论keydown或keyup事件都会存在的一些特殊情况。在Firefox和Opera中，按分号键时keyCode值为59，也就是ASCII中分号的编码；
+    但IE和Safari和Chrome返回186，即键盘中按键的键码。
+     */
+
+    /*
+        二、字符编码
+        发生keypress事件意味着按下的键会影响到屏幕中文本的显示。在所有浏览器中，按下能够插入或删除字符的键都会触发
+      keypress事件；按下其他键能否触发此事件因浏览器而已。由于截止到2008年，尚无浏览器实现“DOM3级事件”规范，所以浏览器
+      之间的键盘事件并没有多大的差异。
+        IE9、Firefox、Chrome和Safari的event对象都支持一个charCode属性，这个属性只有在发生keypress事件时才包含值，而且这
+      个值是按下的那个键所代表字符的ASCII编码。此时的keyCode通常等于0或者也可能等于所按键的键码。IE8及之前版本和Opera则
+      是在在keyCode中保存字符的ASCII编码。要想以跨浏览器的方式取得字符编码，必须首先检测charCode属性是否可用，如果不可用
+      则使用keyCode，如下面的例子所示。
+     var EventUtil = {
+
+        //省略的代码
+
+     getCharCode: function(event){
+     if(event.charCode){
+     return event.charCode;
+     }else{
+     return event.keyCode;
+     }
+   }
+
+     //省略的代码
+
+     };
+
+         这个方法首先检测charCode属性是否包含数值（在不支持这个属性的浏览器中，值为undefined），如果是，则返回该值。否则，
+     就返回keyCode属性值。下面是使用这个方法的示例。
+     */
+    /*
+    EventUtil.addHandler(textbox,"keypress",function(event){
+        event = EventUtil.getEvent(event);
+        alert(EventUtil.getCharCode(event));
+    });
+    */
+    //在取得了字符编码之后，就可以使用String.fromCharCode()将其转换成实际的字符。
+
+    /*
+       三、DOM3级变化
+          尽管所有浏览器都实现了某种形式的键盘事件，DOM3级事件还是做出了一些改变。比如。DOM3级事件中的键盘事件，不再包含
+       charCode属性，而是包含两个新属性：key和char。
+          其中，key属性是为了取代keyCode而新增的，它的值是一个字符串。在按下某个字符键时，key的值就是相应的文本字符（如
+          “k”或“M”）；在按下非字符键时，key的值是相应键的名（如“Shift”或“Down”）。而char属性在按下字符键时的行为
+          与key相同，但在按下非字符键时值为null。
+          IE9支持key属性，但不支持char属性。Safari 5和Chrome支持名为keyIdentifier的属性，在按下非字符键（例如Shift）的情况
+          下与key的值相同。对于字符键，keyIdentifier返回一个格式类似“U+0000”的字符串，表示Unicode值。
+     */
+    EventUtil.addHandler(textbox,"keyup",function(event){
+        event = EventUtil.getEvent(event);
+        var identifier = event.key || event.keyIdentifier;
+        if(identifier){
+            alert(identifier);
+        }
+    });
+    /*
+       测试了Firefox、Chrome、IE11、360安全浏览器，
+       按下字符键时，360安全浏览器显示的是类似“U+0000”的字符串，其他浏览器显示的是相应的文本字符；
+       按下非字符键时，这几个浏览器显示的是相应的文键的名（如“Shift”或“Down”）；
+       经测试，360安全浏览器支持名为keyIdentifier的属性；Firefox、IE11、Chrome支持key属性。
+     */
+    //由于存在跨浏览器问题，因此本书不推荐使用key、keyIdentifier或char。
+    /*
+       DOM3级事件还添加了一个名为location的属性，这是一个数值，表示按下了什么位置上的键：0表示默认键盘，
+       1表示左侧位置（例如左位的Alt键），2表示右侧位置（例如右侧的Shift键），3表示数字小键盘，4表示移动设备键盘（也就是虚拟键），
+       5表示手柄（如任天堂Wii控制器）。IE9支持这个属性。Safari和Chrome支持名为keyLocation的等价属性，但即有bug——值始终为0，
+       除非按下了数字键盘（此时，值为3）；否则，不会是1、2、4、5.
+     */
+    EventUtil.addHandler(textbox,"keyup",function(event){
+        event = EventUtil.getEvent(event);
+        var loc = event.location || event.keyLocation;
+        if(loc){
+            alert(loc);
+        }
+    });
+    //此处若把“keyup”改为“keydown”事件，则上面的“key”特性事件会受影响，不能显示；
+    /*
+      测试了360安全浏览器、IE111、Firefox 54.0.1、Chrome59.0.3071.115浏览器，
+      360既不支持名为location的属性也不支持名为keyLocation的属性；
+      其余浏览器支持名为location的属性。
+     */
+    //与key属性一样，支持location的浏览器也不多，所以在跨浏览器开发中不推荐使用。
+    /*
+       最后给event对象添加了getModifierState()方法。这个方法接受一个参数，即等于Shift、Control、AltGraph或Meta的字符串，
+       表示要检测的修改键。如果指定的修改键是活动的（也就是处于被按下的状态），这个方法返回true，否则返回false。
+     */
+    EventUtil.addHandler(textbox,"keyup",function(event){
+        event = EventUtil.getEvent(event);
+        if(event.getModifierState){
+            alert(event.getModifierState("Shift"));
+        }
+    });
+    /*
+      实际上，通过event对象的shiftKey、altKey、ctrlKey和metaKey属性已经可以取得类似的属性了。
+      IE9是唯一至支持getModifierState()方法的浏览器。
+     */
+
+    /*
+        四、textInput事件
+       “DOM3级事件”规范中引入了一个新事件，名叫textInput。根据规范，当用户在可编辑区域中输入字符时，就会触发这个事件。
+       这个用于替代keypress的textInput事件的行为稍有不同。区别之一就是任何可获得焦点的元素都可以触发keypress事件，
+       但只有可编辑区域才能触发textInput事件。区别二是textInput事件只会在用户按下能够输入实际字符的键时才会被触发，
+       而keypress事件则在按下那些能够影响文本显示的键时也会触发（例如退格键）。
+       由于textInput事件主要考虑的是字符，因此它的event对象中还包含一个data属性，这个属性的值就是用户输入的字符（而非字符编码）。
+       换句话说，用户在没有按上档键的情况下按下了S键，data的值就是“s”，而如果在按住上档键时按下该键，data的值就是“S”。
+       开启了大写锁定键（CapsLK），按S键，data的值是“S”，而按住上档键（Shift）时按下S键，data的值是“s”。
+       以下是一个使用textInput事件的例子。
+     */
+    EventUtil.addHandler(textbox,"textInput",function(event){
+        event = EventUtil.getEvent(event);
+        alert(event.data);
+    });
+    //在这个例子中，插入到文本框中的字符会通过一个警告框显示出来。
+
+    /*
+        另外，event对象上还有一个属性，叫inputMethod，表示把文本输入到文本框中的方式。
+        0：表示浏览器不确定是怎么输入的。
+        1：表示是使用键盘输入的。
+        2：表示文本是粘贴进来的。
+        3：表示文本是拖放近来的。
+        4：表示文本是使用IME输入的。
+        5：表示文本是通过在表单中选择某一项输入的。
+        6：表示文本是通过手写输入的（比如使用手写笔）。
+        7：表示文本是通过语音输入的。
+        8：表示文本是通过几种方法组合输入的。
+        9：表示文本是通过脚本输入的。
+        使用这个属性可以确定文本是如何输入到控件中的，从而可以验证其有效性。支持textInput属性的浏览器有IE9+、Safari和Chrome。
+        只有IE支持inputMethod属性。
+     */
+
+    /*
+        五、设备中的键盘事件
+        任天堂Wii会在用户按下Wii遥控器上的按键时触发键盘事件。尽管没有办法访问Wii遥控器中的所有按键，但还是有一些键可以
+        触发键盘事件。
+        当用户按下键盘（键码为175~178）、减号（170）、加好（174）、1（172）或2（173）键时就会触发键盘事件。但没有办法得知
+        用户是否按下了电源开关、A、B或主页键。
+        iOS版Safari和Android版WebKit在使用屏幕键盘时会触发键盘事件。
+     */
+
+</script>
+</body>
+</html>
