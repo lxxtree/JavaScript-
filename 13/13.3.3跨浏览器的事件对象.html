@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>跨浏览器的事件对象</title>
+    <script type="text/javascript" src="scripts/EventUtil.js"></script>
+
+</head>
+<body>
+<input type="button" id="myBtn" value="Click me" />
+<a href="http://www.baidu.com/" id="myLink">CLICK</a>
+<input type="button" id="myBtn1" value="Here! Click!" />
+<script type="text/javascript">
+    /*
+       虽然DOM和IE中的event对象不同，但基于它们之间的相似性依旧可以拿出跨浏览器的方案来。IE中event对象的全部信息和方法DOM
+       对象中都有，只不过实现方法不一样。不过，这种对应关系让实现两种事件模型之间的映射非常容易。可以对前面介绍的EventUtil
+       对象加以增强，添加如下方法以求同存异。
+     */
+/*
+ var EventUtil = {
+ addHandler:function(element,type,handler){
+   //省略代码
+ },
+ getEvent:function(event){
+ return event ? event : window.event;
+ },
+
+ getTarget:function(event){
+ return event.target || event.srcElement;
+ },
+
+ preventDefault:function(event){
+ if(event.preventDefault){
+ event.preventDefault();
+ }else{
+ event.returnValue = false;
+ }
+ },
+
+ removeHandler:function(element,type,handler){
+ //省略代码
+ },
+
+ stopPropagation: function(event){
+ if(event.stopPropagation){
+ event.stopPropagation();
+ }else{
+ event.cancelBubble = true;
+ }
+ }
+ };
+ */
+/*
+        以上代码显示，我们为EventUtil添加了4个新方法。第一个是getEvent（），它返回对event对象的引用。考虑到IE中事件对象的位置
+    不同，可以使用这个方法来取得event对象，而不必担心指定事件处理程序的方式。在使用这个方法时，必须假设有一个事件对象传入
+    到事件处理程序中，而且要把该变量传给这个方法，如下所示。
+ */
+var btn = document.getElementById("myBtn");
+btn.onclick = function(event){
+    event = EventUtil.getEvent(event);
+};
+/*
+    在兼容DOM的浏览器中，event变量只是简单地传入和返回。而在IE中，event参数是未定义的（undefined），因此就会返回window.event。
+    将这一行代码添加到事件处理程序的开头，就可以确保随时都能使用event对象，而不必担心用户使用的是什么浏览器。
+ */
+/*
+   第二个方法是getTarget（），它返回事件的目标。在这个方法内部，会检测到event对象的target属性，如果存在则返回该属性的值；
+   否则，返回srcElment属性的值。可以像下面这样使用这个方法。
+ */
+btn.onclick = function(event){
+    event =EventUtil.getEvent(event);
+    var target = EventUtil.getTarget(event);
+    alert(target.tagName);
+};
+EventUtil.addHandler(btn,"click",function(event){
+    event = EventUtil.getEvent(event);
+    var target = EventUtil.getTarget(event);
+    alert(target.tagName);
+});
+/*
+   第三个方法是preventDefault（），用于取消事件的默认行为。在传入event对象后，这个方法会检查是否存在preventDefault（）方法，
+   如果存在则调用该方法。如果preventDefault()方法不存在，则将returnValue设置为false。下面是使用这个方法的例子。
+ */
+var link = document.getElementById("myLink");
+link.onclick = function(event){
+    event = EventUtil.getEvent(event);
+   EventUtil.preventDefault(event);
+};
+/*
+   以上代码可以确保在所有浏览器中单击该链接都不会打开另一个页面。首先，使用EventUtil.getEvent()取得event对象，然后将其
+   传入到EventUtil.preventDefault()以取消默认行为。
+ */
+/*
+   第四个方法是stopPropagation()，其实现方法类似。首先尝试使用DOM方法阻止事件流，否则就使用cancelBubble属性。
+   下面看一个例子。
+ */
+var btn1 = document.getElementById("myBtn1");
+btn1.onclick = function(event){
+    alert("I am Clicked!");
+    event = EventUtil.getEvent(event);
+    EventUtil.stopPropagation(event);
+};
+/*
+    EventUtil.addHandler(btn1,"click",function(event){
+        alert("I am Clicked!");
+        event = EventUtil.getEvent(event);
+        EventUtil.stopPropagation((event));
+    });
+*/
+document.body.onclick = function(event){
+    alert("Body clicked!");
+};
+/*
+    在此，首先使用EventUtil.getEvent()取得了event对象，然后又将其传入到EventUtil.stopPropagation()。别忘了由于IE不支持
+    事件捕获，因此这个方法在跨浏览器的情况下，也只能用来阻止事件冒泡。
+ */
+
+</script>
+</body>
+</html>
