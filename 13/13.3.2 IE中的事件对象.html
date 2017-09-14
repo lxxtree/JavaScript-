@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IE中的事件对象</title>
+</head>
+<body>
+<input type="button" id="myBtn" value="Click me" />
+<input type="button" id="myBtn1" value="Click here" />
+<input type="button" id="myBtn2" value="HEY!CLICK!" />
+<a href="www.baidu.com" id="myLink">Click</a>
+<input type="button" id="myBtn3" value="Click! Click!" />
+<script>
+    /*
+         与访问DOM中的event对象不同，要访问IE中的event对象有几种不同的方式，取决于指定事件处理程序的方法。在使用DOM0级方法添加
+    事件处理程序时，event对象作为window对象的一个属性存在。来看下面的例子。
+    */
+    var btn = document.getElementById("myBtn");
+    btn.onclick = function(){
+        var event = window.event;
+        alert(event.type);   //"click"
+    };
+    /*
+           在此，我们通过window.event取得了event对象，并检测了被触发事件的类型（IE中的type属性与DOM中的type属性是相同的）。
+       可是，如果事件处理程序是使用attachEvent（）添加的，那么就会有一个event对象作为参数被传入事件处理程序函数中，
+       如下所示
+     */
+    var btn1 = document.getElementById("myBtn1");
+    btn1.attachEvent("onclick",function(event){
+        alert(event.type);   //"click"
+    });
+    /*
+       在像这样使用attachEvent（）的情况下，也可以通过window对象来访问event对象，就像使用DOM0级方法一样。不过为方便起见，
+       同一个对象也会作为参数传递。
+     */
+    /*
+             IE的event对象同样也包含与创建它的事件相关的属性和方法。其中很多属性和方法都有对应的或者相关的DOM属性和方法。
+        与DOM的event对象一样，这些属性和方法也会因为事件类型的不同而不同，但所有事件对象都会包含下表所列的属性和方法。
+        cancelBubble：类型为Boolean，读写类型为读/写；默认值为false，但将其设置为true就可以取消事件冒泡（与DOM中的
+                      stopPropagation（）方法的作用相同）
+        returnValue：类型为Boolean，读写类型为读/写，默认值为true，但将其设置为false就可以取消事件的默认行为（与DOM中的
+                     preventDefault（）方法的作用相同）
+        srcElement：类型为Element，读写类型为只读，事件的目标（与DOM中的target属性相同）
+        type：类型为String，读写类型为只读，被触发的事件的类型
+     */
+    /*
+       因为事件处理程序的作用域是根据指定它的方式来确定的，所以不能认为this会始终等于事件目标。故而，最好还是使用
+       event.srcElement比较保险，例如：
+     */
+    var btn2 = document.getElementById("myBtn2");
+    btn2.onclick = function(){
+        alert(window.event.srcElement === this);   //true
+    };
+    btn2.attachEvent("onclick",function(event){
+        alert(event.srcElement === this);    //false
+    });
+    /*
+       在第一个事件处理程序中（使用DOM0级方法指定的），srcElement属性等于this，但在第二个事件处理程序中，这两者的值不相同。
+       如前所述，returnValue属性相当于DOM中的preventDefault（）方法，它们的作用都是取消给定事件的默认行为。只要将returnValue
+       设置为false，就可以阻止默认行为。来看下面的例子。
+     */
+    var link = document.getElementById("myLink");
+    link.onclick = function(){
+        window.event.returnValue = false;
+    };
+    /*
+           这个例子在onclick事件处理程序中使用returnValue达到了阻止链接默认行为的目的。与DOM不同的是，在此没有办法确定事件
+       是否能被取消。
+           相应地，cancelBubble属性与DOM中的stopPropagation（）方法作用相同，都是用来停止事件冒泡的。由于IE不支持事件捕获，
+        因而只能取消事件冒泡；但stopPropagation（）可以同时取消事件捕获和冒泡。例如：
+     */
+    var btn3 = document.getElementById("myBtn3");
+    btn3.onclick = function(){
+        alert("I am Clicked!");
+        window.event.cancelBubble = true;
+    };
+    document.body.onclick = function(){
+        alert("Body Clicked!");
+    };
+    /*
+           通过在onclick事件处理程序中将cancelBubble设置为true，就可阻止事件通过冒泡儿触发document.body中注册的事件处理程序。
+       结果，在单击按钮后，只显示一个警告框。
+     */
+</script>
+<!--
+    如果是通过HTML特性指定的事件处理程序，那么还可以通过一个名叫event的变量来访问event对象（与DOM中事件模型相同）。
+    再看一个例子
+-->
+<input type="button" value="Click it" onclick="alert(event.type)" />
+</body>
+</html>
