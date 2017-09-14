@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IE中的事件模拟</title>
+    <script type="text/javascript" src="scripts/EventUtil.js"></script>
+
+</head>
+<body>
+<input type="button" value="Click me" id="myBtn" />
+<input type="button" value="Send click to the other button" id="myBtn2" />
+<p>This example works only in Internet Explorer.</p>
+<br>
+<br>
+<input type="text" id="myTextbox" />
+<input type="button" value="Send keypress to the textbox" id="myBtn3" />
+<p>This example works in IE though no text will appear in the textbox.</p>
+
+<script type="text/javascript">
+    /*
+          在IE及之前版本中模拟事件与在DOM中模拟事件的思路相似：先创建event对象，然后为其指定相应的信息，然后再使用该对象来
+       触发事件。当然，IE在实现每个步骤时都采用了不一样的方式。
+          调用document.createEventObject()方法可以在IE中创建event对象。但与DOM方式不同的是，这个方法不接受参数，
+      结果会返回一个通用的event对象。然后，你必须手工为这个对象添加所有必要的信息（没有方法来辅助完成这一步骤）。
+      最后一步就是在目标上调用fireEvent()方法，这个方法接受两个参数：事件处理程序的名称和event对象。
+      在调用fireEvent()方法时，会自动为event对象添加srcElement和type属性；其他属性则都是必须通过手工添加的。
+      换句话说，模拟任何IE支持的事件都采用相同的模式。例如，下面的代码模拟了在一个按钮上触发click事件过程。
+     */
+    (function(){
+        var btn = document.getElementById("myBtn");
+        var btn2 = document.getElementById("myBtn2");
+
+        EventUtil.addHandler(btn,"click",function(event){
+            alert("Clickd");
+            alert(event.screenX);   //100
+        });
+
+        EventUtil.addHandler(btn2,"click",function(event){
+            //创建事件对象
+            var event = document.creatEventObject();
+
+            //初始化事件对象
+            event.screenX = 100;
+            event.screenY = 0;
+            event.clientX = 0;
+            event.clientY = 0;
+            event.ctrlKey = false;
+            event.altKey = false;
+            event.shiftKey = false;
+            event.button = 0;
+            event.relatedTarget = null;
+
+            //触发事件
+            btn.fireEvent("onclick",event);
+        });
+    })();
+    /*
+         这个例子先创建了一个event对象，然后又用一些信息对其进行了初始化。注意，这里可以为对象随意添加属性，
+      不会有任何限制——即使添加的版本IE8及更早版本并不支持也无所谓。在此添加的属性对事件没有什么影响，
+      因为只有事件处理程序才会用到它们。
+     */
+    //采用相同的模式也可以模拟触发keypress事件，如下面的例子所示。
+    (function(){
+        var textbox = document.getElementById("myTextbox");
+        var btn3 = document.getElementById("myBtn3");
+
+        EventUtil.addHandler(textbox,"keypress",function(event){
+            event = EventUtil.getEvent(event);
+            var CharCode = EventUtil.getCharCode(event);
+            alert(CharCode);
+        });
+
+        EventUtil.addHandler(button,"click",function(event){
+            //创建事件对象
+            var event = document.createEventObjec();
+
+            //初始化事件对象
+            event.altKey = false;
+            event.ctrlKey = false;
+            event.shiftKey = false;
+            event.keyCode = 65;
+
+            //触发事件
+            textbox.fireEvent("onkeypress",event);
+        });
+    })();
+    /*
+       由于鼠标事件、键盘事件以及其他事件的event对象并没与什么不同，所以可以使用通用对象来触发任何类型的事件。
+       不过，正如在DOM中模拟键盘事件一样，运行这个例子也不会因模拟了keypress而在文本框中看到任何字符，即使触发了事件处理程序也没有用
+     */
+</script>
+
+</body>
+</html>
