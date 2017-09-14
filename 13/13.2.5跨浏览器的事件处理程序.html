@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>13.2.5跨浏览器的事件处理程序</title>
+    <script type="text/javascript" src="scripts/13.2.5%20EventUtil.js"></script>
+</head>
+<body>
+<!--
+        为了以跨浏览器的方式处理事件，不少开发人员会使用能够隔离浏览器差异的JavaScript库，还有一些开发人员会自己开发最合
+    适的事件处理的方法。自己编写代码其实不难，只要恰当地使用能力检测即可（能力检测在第9章介绍过）。要保证处理事件的代码
+    能在大多数浏览器下一致地运行，只需关注冒泡阶段。
+        第一个要创建的方法是addHandler(),它的职责是视情况分别使用DOM0级方法、DOM2级方法或IE方法来添加事件。这个方法属于
+     一个名叫EventUtil的对象，本书将使用这个对象来处理浏览器间的差异。
+     addHandler（）方法接受3个参数：要操作的元素、事件名称和事件处理程序函数。
+       与addHandler（）对应的方法是removeHandler（），它也接受相同的参数。这个方法的职责是移除之前添加的事件处理程序——
+     无论该事件处理程序是采取什么方式添加到元素中的，如果其他方法无效，默认采用DOM0级方法。
+        EventUtil的用法如下：
+     var EventUtil = {
+    addHandler:function(element,type,handler){
+        if(element.addEventListener){
+            element.addEventListener(type,handler,false);
+        }else if(element.attachEvent){
+            element.attachEvent("on"+type,handler);
+        }else{
+            element["on"+type] = handler;
+        }
+    },
+
+    removeHandler:function(element,type,handler){
+        if(element.removeEventListener){
+            element.removeEventListener(type,handler,false);
+        }else if(element.detachEvent){
+            element.detachEvent("on"+type,handler);
+        }else{
+            element["on"+type] = null;
+        }
+    }
+};
+       这两个方法首先都会检测传入的元素中是否存在DOM2级方法。如果存在DOM2级方法，则使用该方法：传入事件类型、事件处理程序
+   函数和第三个参数false（表示冒泡阶段）。如果存在的是IE的方法，则采用第二种方案。注意，为了在IE8及更早版本中运行，此时
+   的事件类型必须加上“on”前缀。最后一种可能就是使用DOM0级方法（在现在浏览器中，应该不会执行这里的代码）。此时，我们使用
+   的是方括号语法来将属性名指定为事件处理程序，或者将属性设置为null。
+       可以像下面这样使用EventUtil对象：
+-->
+     <input type="button" id="myBtn"value="Click me" />
+     <script>
+         var btn = document.getElementById("myBtn");
+         var handler = function(){
+             alert("I am Clicked!");
+         };
+         EventUtil.addHandler(btn,"click",handler);
+         EventUtil.removeHandler(btn,"click",handler);
+
+         //这里省略了其他代码
+
+         /*
+                addHandler()和removeHandler()没有考虑到所有的浏览器问题，例如在IE中的作用域问题。
+            不过，使用它们添加和移除事件处理程序还是足够了。此外还要注意，DOM0级对每个事件只支持一个事件处理程序。
+            好在，只支持DOM0级的浏览器已经没有那么多了，因此这对你而言应该不是什么问题。
+          */
+     </script>
+</body>
+</html>
