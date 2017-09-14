@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>复合事件</title>
+    <script type="text/javascript" src="scripts/EventUtil.js"></script>
+</head>
+<body>
+<input type="text" id="myText" />
+<p>This example only works in browsers that support composition events. You'll need to use an input method editor (IME) to fire these events.</p>
+<script type="text/javascript">
+/*
+   复合事件（composition event）是DOM3级事件中新添加的一类事件，用于处理IME的输入序列。
+   IME（Input Method Editor，输入法编辑器）可以让用户输入在物理键盘上找不到的字符。例如，使用拉丁文键盘的用户通过IME照样
+   能输入日文字符。IME需要同时按住多个键，但最终只输入一个字符。复合事件就是针对检测和处理这种输入而设计的。
+   有以下三种复合事件。
+   1、compositionstart：在IME的文本复合系统打开时触发，表示要开始输入了。
+   2、compositionupdate：在向输入字段中插入新字符时触发。
+   3、compositionend：在IME的文本复合系统关闭时触发，表示返回正常键盘输入状态。
+  复合事件与文本事件在很多方面都很相似。在触发复合事件时，目标是接收文本的输入字段。但它比文本事件的事件对象多一个data，
+  其中包含以下几个值中的一个：
+  1、如果在compositionstart事件发生时访问，包含正在编辑的文本（例如，已经选中的需要马上替换的文本）；
+  2、如果在compositionupdate事件发生时访问，包含正插入的新字符；
+  3、如果在compositonend事件发生时访问，包含此次输入会话中插入的所有字符。
+  与文本事件一样，必要时可以利用复合事件来筛选输入。可以像下面这样使用它们：
+ */
+var textbox = document.getElementById("myText");
+EventUtil.addHandler(textbox,"compositionstart",function(event){
+    event = EventUtil.getEvent(event);;
+    alert(event.data);
+});
+
+EventUtil.addHandler(textbox,"compositionupdate",function(event){
+    event = EventUtil.getEvent(event);
+    alert(event.data);
+});
+
+EventUtil.addHandler(textbox,"compositionend",function(event){
+    event = EventUtil.getEvent(event);
+    alert(event.data);
+});
+
+/*
+   IE9+是2011年唯一支持复核事件的浏览器。由于缺少支持，对于需要开发跨浏览器应用的开发人员，它的用处不大。
+   要确定浏览器是否支持复合事件，可以使用以下代码：
+ */
+var isSupported = document.implementation.hasFeature("CompositionEvent","3.0");
+alert(isSupported);
+</script>
+</body>
+</html>
